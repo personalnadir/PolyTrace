@@ -13,4 +13,8 @@ class ZoomControl {
 	static float getZoom(){
 		return zoomLevel;
 	}
+
+	static void reset() {
+		zoomLevel=1f;
+	}
 }

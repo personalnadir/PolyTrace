@@ -28,4 +28,10 @@ class Camera {
 	static boolean isDragging() {
 		return dragging;
 	}
+
+	static void reset() {
+		x=0;
+		y=0;
+		dragging=false;
+	}
 }

@@ -19,6 +19,8 @@ class Data {
 class LoadData implements Command {
 	public void execute(Object data) {
 		ShapeManager.reset();
+		ZoomControl.reset();
+		Camera.reset();
 				
 		String json=(String)data;
 		Gson gson = new Gson();
