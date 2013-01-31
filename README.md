@@ -1,7 +1,13 @@
 
 # PolyTrace: What is this?
 
-PolyTrace is allows users to create 2D polygons and export them as JSON data. You can load images and trace polygons around them or just work from scratch. PolyTrace will also identify whether a polygon is convex or concave. But it will export all types!
+PolyTrace is a tool which allows users to create 2D polygons and export them as JSON data. You can load images and trace polygons around them or just work from scratch. PolyTrace will also identify whether a polygon is convex or concave. But it will export all types!
+
+# How to build
+
+PolyTrace is a [Processing](http://processing.org/) sketch. To run it download Processing and place the code in your Processing sketchbook location in a directory called PolyTrace. PolyTrace uses the [Gson](http://code.google.com/p/google-gson/) library, but unusually due to issues on my part, that's been included for now in this repository. Ideally it would be installed into the libraries directory in the sketchbook location.
+
+From within Processing you can, if you want to, export PolyTrace as a standalone application. For Mac users, the repository includes sketch.icns with which you can replace the default icon Processing puts in the .app it generates. 
 
 # GUI and Shortcuts (Mac Only)
 ![Load Existing Polygon Definition](data/folder.png)
