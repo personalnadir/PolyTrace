@@ -1,12 +1,13 @@
 import processing.core.*;
+import java.util.ArrayList;
 
 class Geometry {
-	static boolean isConvex(PShape s) {
+	static boolean isConvex(ArrayList<PVector> s) {
 		boolean positive=false;
-		for (int i=0; i<s.getVertexCount(); i++){
-			PVector v1=s.getVertex(i);
-			PVector v2=s.getVertex((i+1)%s.getVertexCount());
-			PVector v3=s.getVertex((i+2)%s.getVertexCount());
+		for (int i=0; i<s.size(); i++){
+			PVector v1=s.get(i);
+			PVector v2=s.get((i+1)%s.size());
+			PVector v3=s.get((i+2)%s.size());
 			
 			float e1x=v2.x-v1.x;
 			float e1y=v2.y-v1.y;
@@ -26,13 +27,13 @@ class Geometry {
 			positive=sense;
 		}
 		
-		for (int i=1; i<s.getVertexCount(); i++){
-			PVector v1=s.getVertex(i);
-			PVector v2=s.getVertex((i+1)%s.getVertexCount());
+		for (int i=1; i<s.size(); i++){
+			PVector v1=s.get(i);
+			PVector v2=s.get((i+1)%s.size());
 			
-			for (int k=i+2; k<s.getVertexCount(); k++) {
-				PVector v3=s.getVertex(k);
-				PVector v4=s.getVertex((k+1)%s.getVertexCount());
+			for (int k=i+2; k<s.size(); k++) {
+				PVector v3=s.get(k);
+				PVector v4=s.get((k+1)%s.size());
 
 				if (lineSegmentsIntersect(v1.x,v1.y,v2.x,v2.y,v3.x,v3.y,v4.x,v4.y)) {
 					return false;

@@ -1,24 +1,19 @@
 import processing.core.*;
 import java.util.Stack;
+import java.util.ArrayList;
 
 class Shape {
 	PShape s;
 	PShape handles;
 	PApplet pa;
-	Stack<PShape> handleStack=new Stack();
-	PShape selectedPoint=null;
+	Stack<PVector> handleStack=new Stack<PVector>();
+	ArrayList<PVector> points=new ArrayList<PVector>();
+	boolean drawInFocus=false;
 
 	Shape(PApplet p){
 		pa=p;
-		handles=pa.createShape(PShape.GROUP);
-		initS();
-	}
-
-	private void initS(){
-		s=pa.createShape();
-		s.fill(42,71,94, 64);
-		s.stroke(255,245,230);
-		s.strokeWeight(2);
+		createPolygon();
+		createHandles();
 	}
 
 	void draw(boolean current){
@@ -26,51 +21,89 @@ class Shape {
 		pa.shape(handles);
 	}
 
-	void colourFocussed(){
+	void inFocus(boolean yes){
+		drawInFocus=yes;
+		update();
+	}
+
+	private void colourFocussed(){
 		s.stroke(255,245,230);
 	}
 
-	void colourOutOfFocus(){
+	private void colourOutOfFocus(){
 		s.stroke(69,23,47,64);
 	}
 
-	void colourConcave(){
+	private void colourConcave(){
 		s.fill(255,0,0,64);
 	}
 
-	void colourConvex(){
+	private void colourConvex(){
 		s.fill(42,71,94, 64);
 	}
 
-	void colourShapeType(){
-		if (Geometry.isConvex(s)){
+	private void colourShapeType(){
+		if (Geometry.isConvex(points)){
 			colourConvex();
 		} else {
 			colourConcave();
 		}
 	}
 
-	void colourPointsDeselected() {
-		for (PShape p:handleStack) {
-			p.stroke(42,71,94);
+	void setPointSelected(PVector p) {
+		while (handleStack.indexOf(p)>=0) {
+			handleStack.remove(handleStack.indexOf(p));
+		}
+
+		handleStack.push(p);
+	}	
+
+	private void createPolygon(){
+		s=pa.createShape();
+		s.beginShape();
+
+		s.strokeWeight(2);
+	
+		if (drawInFocus) colourFocussed();
+		else colourOutOfFocus();
+		colourShapeType();
+
+		for (PVector v : points) {
+			s.vertex(v.x,v.y);
+		}
+		s.endShape(PShape.CLOSE);
+	}
+
+	private void createHandles(){
+		handles=pa.createShape(PShape.GROUP);
+		pa.ellipseMode(PShape.CENTER);
+		pa.strokeWeight(2);
+		pa.fill(42,71,94, 64);
+
+    PVector selected=handleStack.isEmpty()? null : handleStack.peek();
+    PVector previous=getPrevious();
+    for (PVector v : points) {
+			if (selected==v && drawInFocus) pa.stroke(16,159,145);
+			else if (previous==v && drawInFocus) pa.stroke(16/2,159/2,145/2);
+			else pa.stroke(42,71,94, 64);
+			
+			PShape handle=pa.createShape(PShape.ELLIPSE,v.x-5,v.y-5,10,10);
+			handles.addChild(handle);
 		}
 	}
 
-	void setPointSelected(PShape p) {
-		colourPointsDeselected();
-		p.stroke(16,159,145);
-		selectedPoint=p;
+	public void update(){
+		createPolygon();
+		createHandles();
 	}
 
 	void addPoint(int x, int y) {
 		int index=-1;
 
 		if (!handleStack.isEmpty()) {
-			index=handleStack.indexOf(selectedPoint);
+			index=points.indexOf(handleStack.peek());
 		}
 		
-		PShape oldS=s;
-		initS();
 		float zoom=ZoomControl.getZoom();
 		x=(int)(x/zoom+0.5f);
 		y=(int)(y/zoom+0.5f);
@@ -80,73 +113,28 @@ class Shape {
 		x-=cx;
 		y-=cy;
 
-		for (int i = 0; i < oldS.getVertexCount(); i++) {
-			PVector v = oldS.getVertex(i);
-			s.vertex(v.x,v.y);
-
-			if (i==index) {
-				s.vertex(x,y);
-			}
-		}
-
-		if (index==-1) {
-			s.vertex(x,y);
-		}
-		s.end(PShape.CLOSE);
-
-		pa.ellipseMode(PShape.CENTER);
-		pa.fill(42,71,94, 64);
-		pa.strokeWeight(2);
-		PShape handle=pa.createShape(PShape.ELLIPSE,x-5,y-5,10,10);
-		handles.addChild(handle);
-
-		if (index==-1) {
-			handleStack.push(handle);
-		} else {
-			handleStack.insertElementAt(handle,index+1);
-		}
-
-		setPointSelected(handle);
-		colourShapeType();
-	}
-
+		PVector p=new PVector(x,y);
+		handleStack.push(p);
+		
+		if (index==-1) points.add(p);
+		else points.add(index,p);
+		
+		createPolygon();
+		createHandles();
+	}		
+		
 	void removeSelectedPoint() {
-		if (selectedPoint==null) return;
-
-		int index=handleStack.indexOf(selectedPoint);
-		handleStack.removeElement(selectedPoint);
-
-		PShape oldS=s;
-		initS();
-
-		for (int i = 0; i < oldS.getVertexCount(); i++) {
-			if (i==index) continue;
-
-			PVector v = oldS.getVertex(i);
-			s.vertex(v.x,v.y);
-		}
-		s.end(PShape.CLOSE);
-
-		handles=pa.createShape(PShape.GROUP);
-
+		if (points.size()==0) return;
 		if (handleStack.isEmpty()) {
-			return;
+			points.remove(points.size()-1);
+		}
+		else {
+			PVector remove=handleStack.pop();
+			points.remove(points.indexOf(remove));
 		}
 
-		for (PShape p : handleStack){
-			handles.addChild(p);
-		}
-
-		colourPointsDeselected();
-		PShape next;
-		if (index==0) {
-			next=handleStack.peek();
-		} else {
-			next=handleStack.elementAt(index-1);
-		}
-
-		setPointSelected(next);
-		colourShapeType();
+		createPolygon();
+		createHandles();
 	}
 
 	ModifiableVector intersectsPoint(int x, int y) {
@@ -159,12 +147,12 @@ class Shape {
 		x-=cx;
 		y-=cy;
 
-		for (int i = 0; i < s.getVertexCount(); i++) {
-			PVector v = s.getVertex(i);
+		for (int i=0; i<points.size();i++) {
+			PVector v = points.get(i);
 			float dx=x-v.x;
 			float dy=y-v.y;
 			if (dx*dx+dy*dy<5*5) {
-				return new ModifiableVector(s,i,handleStack.elementAt(i));
+				return new ModifiableVector(this,i);
 			}
 		}
 
@@ -172,12 +160,18 @@ class Shape {
 	}
 
 	PVector[] getVerticies() {
-		PVector[] verticies=new PVector[s.getVertexCount()];
+		return points.toArray(new PVector[0]);
+	}
 
-		for (int i = 0; i < s.getVertexCount(); i++) {
-			PVector v = s.getVertex(i);
-			verticies[i]=v;
-		}
-		return verticies;
+	PVector getVertex(int i) {
+		return points.get(i);
+	}
+
+	int getVertexCount(){
+		return points.size();
+	}
+
+	PVector getPrevious(){
+		return handleStack.size()<=1? null : handleStack.get(handleStack.size()-2);
 	}
 }

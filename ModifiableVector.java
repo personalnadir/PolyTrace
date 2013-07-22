@@ -1,49 +1,40 @@
 import processing.core.*;
 
 class ModifiableVector{
-	PShape s;
-	PShape handle;
+	Shape s;
 	int vindex;
+	PVector v;
 
-	ModifiableVector(PShape s, int index, PShape handle) {
+	ModifiableVector(Shape s, int index) {
 		this.s=s;
-		this.handle=handle;
 		this.vindex=index;
+		v=s.getVertex(index);
 	}
 
 	float getX() {
-		return s.getVertex(vindex).x;
+		return v.x;
 	}
 
 	float getY() {
-		return s.getVertex(vindex).y;
+		return v.y;
 	}
 	
 	void setPos(int x, int y){
-		PVector v=s.getVertex(vindex);
-		int vx=(int)(x-v.x);
-		int vy=(int)(y-v.y);
-		
 		v.x=x;
 		v.y=y;
+		s.update();
+}
 
-		s.setVertex(vindex,v);
+	PVector getPreviousPoint(){
+		return s.getPrevious();
+	}	
 
-		handle.translate(vx,vy);
-
-		if (!Geometry.isConvex(s)){
-			setFillColour(255,0,0);
-		} else {
-			setFillColour(42,71,94);
-		}
+	PVector getPoint(){
+		return v;
 	}
 
-	void setFillColour(int r, int g, int b) {
-		s.fill(r,g,b,64);
-	}
-
-	PShape getHandle() {
-		return handle;
+	int getIndex(){
+		return vindex;
 	}
 };
  

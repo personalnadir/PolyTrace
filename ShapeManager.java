@@ -1,5 +1,6 @@
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.ArrayList;
 import processing.core.*;
 
 class ShapeManager{
@@ -24,13 +25,10 @@ class ShapeManager{
 	}
 
 	static void setFocus(Shape inFocus) {
-		if (current!=null&&current!=inFocus) {
-			current.colourPointsDeselected();
-		}
 		for (Shape s:shapes) {
-			s.colourOutOfFocus();
+			s.inFocus(false);
 		}
-		inFocus.colourFocussed();
+		inFocus.inFocus(true);
 		current=inFocus;
 	}
 
@@ -47,7 +45,7 @@ class ShapeManager{
 					dragPoint=v;
 					setFocus(s);
 
-					s.setPointSelected(dragPoint.getHandle());
+					s.setPointSelected(dragPoint.getPoint());
 				}
 			}
 
@@ -84,10 +82,11 @@ class ShapeManager{
 				ModifiableVector v=s.intersectsPoint(mouseX,mouseY);
 				if (v!=null) {
 					for (Shape sh:shapes){
-						sh.colourPointsDeselected();
+						sh.inFocus(false);
 					}
 
-					s.setPointSelected(v.getHandle());
+					s.setPointSelected(v.getPoint());
+ s.inFocus(true);
 					clicked=s;
 					break;
 				}
@@ -107,7 +106,7 @@ class ShapeManager{
 	}
 
 	static void newShape(){
-		if (current!=null && current.getVerticies().length==0) {
+		if (current!=null && current.getVertexCount()==0) {
 			return;
 		}
 		Shape s=new Shape(pa);
@@ -118,17 +117,15 @@ class ShapeManager{
 	static PVector[][] getShapeCoordinates(){
 		int toExport=0;
 		for (Shape s: shapes) {
-			PVector[] verticies=s.getVerticies();
-			if (verticies.length>0) toExport++;
+			if (s.getVertexCount()>0) toExport++;
 		}
 		
 		PVector[][] verticiesByShape=new PVector[toExport][];
 
 		int index=0;
 		for (Shape s: shapes) {
-			PVector[] verticies=s.getVerticies();
-			if (verticies.length==0) continue;
-			verticiesByShape[index]=verticies;
+			if (s.getVertexCount()==0)  continue;
+			verticiesByShape[index]=s.getVerticies();
 			index++;
 		}
 
