@@ -9,10 +9,6 @@ class JsonFileWriter implements FileSelectionHandler {
 	}
 
 	public boolean open (File f) {
-		if (!f.getName().endsWith("json")) {
-			return false;
-		}
-
 		try {
 			ReadWriteTextFile rwtf=new ReadWriteTextFile(f.getCanonicalPath());
 			rwtf.write(json);
