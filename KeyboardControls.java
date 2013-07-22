@@ -33,6 +33,9 @@ class KeyboardControls {
 			Image.setImage(null,null);
 		}
 
+		if (checkKey(KeyEvent.VK_CONTROL)){
+			ShapeManager.limitDegrees(true);
+		}
 		if (checkKey(KeyEvent.VK_BACK_SPACE)){
 			ShapeManager.getCurrentShape().removeSelectedPoint();
 		}
@@ -43,5 +46,6 @@ class KeyboardControls {
 
 	static void keyReleased(int keyCode) {
 		keys[keyCode] = false; 
+			ShapeManager.limitDegrees(false);
 	}
 }

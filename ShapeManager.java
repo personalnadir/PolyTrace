@@ -9,6 +9,7 @@ class ShapeManager{
 	static boolean translating=false;
 	static ModifiableVector dragPoint=null;
 	static Shape current=null;
+	static boolean limitedPlacement=false;
 
 	static void init(PApplet p){
 		pa=p;
@@ -60,6 +61,22 @@ class ShapeManager{
 				x-=cx;
 				y-=cy;
 
+				if (limitedPlacement){
+					PVector prev=dragPoint.getPreviousPoint();
+					float dx=x-prev.x;
+					float dy=y-prev.y;
+
+					float angle=PApplet.atan2(dy,dx);
+					angle=PApplet.round((angle+(PConstants.QUARTER_PI)/2)/PConstants.QUARTER_PI)*PConstants.QUARTER_PI;
+
+					float r=PApplet.sqrt(dx*dx+dy*dy);
+
+					float rx=1*r;
+					float ry=0*r;
+					x=(int)(prev.x+(PApplet.cos(angle)*rx-PApplet.sin(angle)*ry));
+					y=(int)(prev.y+(PApplet.cos(angle)*ry+PApplet.sin(angle)*rx));
+				}
+
 				dragPoint.setPos(x,y);
 				return true;
 			}
@@ -99,6 +116,10 @@ class ShapeManager{
 			}
 		}
 		translating=false;
+	}
+
+	static void limitDegrees(boolean on){
+		limitedPlacement=on;
 	}
 
 	static Shape getCurrentShape() {
