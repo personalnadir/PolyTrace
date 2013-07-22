@@ -1,3 +1,6 @@
 /.DS_Store
 application.*
 /build-tmp/
+
+/polytrace.sublime-workspace
+/polytrace.sublime-project
